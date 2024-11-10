@@ -6,26 +6,27 @@ const app = express();
 app.use(express.json());
 
 //Request handlers:
-app.use("/admin", adminAuth);
-
-app.get("/admin/getAllData", (req, res) => {
-  //logic to fetch data
-  res.send("User data sent");
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("Something went wrong - 1");
+  }
 });
 
-app.delete("/admin/deleteUserData", (req, res) => {
-  // finding the user to delete
-  res.send("User deleted");
+app.get("/getUserData", (req, res, next) => {
+  // try {
+  // fetching user data from DB
+  throw new Error("Some error occured");
+  res.send("User Data sent");
+  // }
+  //  catch (error) {
+  //   console.log(error);
+  // }
 });
 
-app.post("/user/login", (req, res) => {
-  // Checking the user login details
-  res.send("User logged in successfully");
-});
-
-app.get("/user/data", userAuth, (req, res) => {
-  // fetch user data
-  res.send("User data sent");
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("Something went wrong - 2");
+  }
 });
 
 // listening on port 3000
