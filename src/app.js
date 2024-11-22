@@ -36,16 +36,47 @@ app.get("/feed", async (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
-  console.log(req.body);
-
   const user = new User(req.body);
 
   try {
     await user.save();
     res.send("Added User Successfully");
   } catch (error) {
-    res.status(400).send("Error occured in adding user");
+    res.status(400).send("Error: " + error.message);
     console.log(error);
+  }
+});
+
+app.delete("/user", async (req, res) => {
+  const userID = req.body.userID;
+  try {
+    // const deletedUser = await User.findByIdAndDelete({ _id: userID });
+    const deletedUser = await User.findByIdAndDelete(userID);
+    res.send("User deleted successfully");
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+app.patch("/user", async (req, res) => {
+  console.log(req.body);
+  const userID = req.body._id;
+  const updatedData = req.body;
+  try {
+    // const deletedUser = await User.findByIdAndDelete({ _id: userID });
+    const updatedUser = await User.findByIdAndUpdate(
+      { _id: userID },
+      updatedData,
+      {
+        runValidators: true,
+        returnDocument: true,
+      }
+    );
+    console.log(updatedUser);
+
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(400).send("Failed to update user");
   }
 });
 
