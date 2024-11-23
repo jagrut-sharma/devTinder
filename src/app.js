@@ -62,21 +62,36 @@ app.patch("/user", async (req, res) => {
   console.log(req.body);
   const userID = req.body._id;
   const updatedData = req.body;
+  const UPDATES_NOT_ALLOWED = ["email", "age", "gender", "firstName"];
+
+  const updateRequested = Object.keys(req.body);
+
   try {
+    // Validations:
+    if (
+      updateRequested.some((update) => UPDATES_NOT_ALLOWED.includes(update))
+    ) {
+      throw new Error("Invalid update, Not allowed");
+    }
+
+    if (updatedData?.skills?.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+
     // const deletedUser = await User.findByIdAndDelete({ _id: userID });
     const updatedUser = await User.findByIdAndUpdate(
       { _id: userID },
       updatedData,
       {
         runValidators: true,
-        returnDocument: true,
+        returnDocument: "after",
       }
     );
     console.log(updatedUser);
 
     res.send("User updated successfully");
   } catch (err) {
-    res.status(400).send("Failed to update user");
+    res.status(400).send("Error: " + err.message);
   }
 });
 
