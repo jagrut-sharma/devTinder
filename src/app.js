@@ -1,5 +1,5 @@
 const express = require("express");
-const { adminAuth, userAuth } = require("./middleware/auth");
+// const { adminAuth, userAuth } = require("./middleware/auth");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 
@@ -58,24 +58,32 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   console.log(req.body);
-  const userID = req.body._id;
+  const userID = req?.params?.userId;
   const updatedData = req.body;
-  const UPDATES_NOT_ALLOWED = ["email", "age", "gender", "firstName"];
+  const UPDATES_ALLOWED = [
+    "lastName",
+    "userName",
+    "password",
+    "photoUrl",
+    "aboutUs",
+    "skills",
+  ];
 
   const updateRequested = Object.keys(req.body);
+  const isUpdateAllowed = updateRequested.every((update) =>
+    UPDATES_ALLOWED.includes(update)
+  );
 
   try {
     // Validations:
-    if (
-      updateRequested.some((update) => UPDATES_NOT_ALLOWED.includes(update))
-    ) {
+    if (!isUpdateAllowed) {
       throw new Error("Invalid update, Not allowed");
     }
 
-    if (updatedData?.skills?.length > 10) {
-      throw new Error("Skills cannot be more than 10");
+    if (updatedData?.skills?.length > 5) {
+      throw new Error("Skills cannot be more than 5");
     }
 
     // const deletedUser = await User.findByIdAndDelete({ _id: userID });
