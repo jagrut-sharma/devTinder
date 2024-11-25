@@ -1,7 +1,9 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 // const { adminAuth, userAuth } = require("./middleware/auth");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const { validateSignupData } = require("./utils/validation");
 
 // creates a server:
 const app = express();
@@ -36,14 +38,51 @@ app.get("/feed", async (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
   try {
+    // data validation
+    validateSignupData(req);
+
+    // extract data what is necessary => do not send unnecessary data to API:
+    const { firstName, userName, email, password } = req.body;
+
+    //hasing the password:
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(hashedPassword);
+
+    // Only pass the things that it requires
+    const user = new User({
+      firstName,
+      userName,
+      email,
+      password: hashedPassword,
+    });
+
     await user.save();
     res.send("Added User Successfully");
   } catch (error) {
     res.status(400).send("Error: " + error.message);
     console.log(error);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      res.send("Login successful");
+    } else {
+      throw new Error("Invalid Credentials");
+    }
+  } catch (error) {
+    res.status(400).send("Error: " + error.message);
   }
 });
 

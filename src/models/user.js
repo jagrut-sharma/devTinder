@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       maxLength: 50,
     },
     lastName: { type: String, trim: true },
-    userName: { type: String, default: "@default" },
+    userName: { type: String, default: "@default", required: true },
     email: {
       type: String,
       unique: true,
