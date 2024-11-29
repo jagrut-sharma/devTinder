@@ -4,10 +4,13 @@ const bcrypt = require("bcrypt");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 const { validateSignupData } = require("./utils/validation");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 // creates a server:
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // Request Handlers:
 app.get("/user", async (req, res) => {
@@ -47,7 +50,6 @@ app.post("/signup", async (req, res) => {
 
     //hasing the password:
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(hashedPassword);
 
     // Only pass the things that it requires
     const user = new User({
@@ -74,13 +76,40 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid Credentials");
     }
 
+    if (!password) {
+      throw new Error("Password required");
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (isPasswordValid) {
+      const token = jwt.sign({ _id: user._id }, "DEVTinder@24");
+      res.cookie("token", token);
       res.send("Login successful");
     } else {
       throw new Error("Invalid Credentials");
     }
+  } catch (error) {
+    res.status(400).send("Error: " + error.message);
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const { token } = req.cookies;
+
+    if (!token) {
+      throw new Error("Invalid token");
+    }
+
+    const { _id } = jwt.verify(token, "DEVTinder@24");
+    const user = await User.findById(_id);
+
+    if (!user) {
+      throw new Error("No user found");
+    }
+
+    res.send(user);
   } catch (error) {
     res.status(400).send("Error: " + error.message);
   }
