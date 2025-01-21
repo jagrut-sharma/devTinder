@@ -10,7 +10,7 @@ authRouter.post("/signup", async (req, res) => {
     validateSignupData(req);
 
     // extract data what is necessary => do not send unnecessary data to API:
-    const { firstName, userName, email, password } = req.body;
+    const { firstName, lastName, email, password, age } = req.body;
 
     //hasing the password:
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -18,13 +18,19 @@ authRouter.post("/signup", async (req, res) => {
     // Only pass the things that it requires
     const user = new User({
       firstName,
-      userName,
+      lastName,
       email,
       password: hashedPassword,
+      age,
     });
 
-    await user.save();
-    res.send("Added User Successfully");
+    const savedUser = await user.save();
+    const token = await savedUser.getJwt();
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 7 * 86400000), // 7 days
+    });
+    res.json({ message: "Added User Successfully", data: savedUser });
   } catch (error) {
     res.status(400).send("Error: " + error.message);
     console.log(error);

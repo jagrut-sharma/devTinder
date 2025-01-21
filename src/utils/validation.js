@@ -1,24 +1,29 @@
 const validator = require("validator");
 
 const validateSignupData = (req) => {
-  const { firstName, userName, email, password } = req.body;
+  const { firstName, age, email, password } = req.body;
 
-  if (!firstName || !userName) {
-    throw new Error("Name is not valid");
+  if (!firstName || !age) {
+    throw new Error("Name and Age is not valid");
   } else if (!validator.isEmail(email)) {
     throw new Error("Invalid Email");
   } else if (!validator.isStrongPassword(password)) {
     throw new Error("Not a strong password");
+  } else if (age < 18) {
+    throw new Error("Age should be greater than 18");
   }
 };
 
 const validateEditProfileData = (req) => {
   const editsAllowed = [
+    "firstName",
     "lastName",
     "userName",
     "photoUrl",
     "aboutUs",
     "skills",
+    "age",
+    "gender",
   ];
 
   const isAllowedEditsPresent = Object.keys(req.body).every((key) =>

@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
       maxLength: 50,
     },
     lastName: { type: String, trim: true },
-    userName: { type: String, default: "@default", required: true },
+    userName: { type: String, default: "@default" },
     email: {
       type: String,
       unique: true,
@@ -36,13 +36,13 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
-    age: { type: Number, min: 18, max: 100 },
+    age: { type: Number, min: 18, max: 100, required: true },
     gender: {
       type: String,
       trim: true,
       // enum: ["male", "female", "other"],
       validate(value) {
-        if (!["male", "female", "other"].includes(value)) {
+        if (!["male", "female", "other"].includes(value.toLowerCase())) {
           throw new Error("Please enter a correct gender");
         }
       },

@@ -3,7 +3,8 @@ const { userAuth } = require("../middleware/auth");
 const ConnectionRequestModel = require("../models/connectionRequest");
 const User = require("../models/user");
 const USER_SAFE_DATA = [
-  "userName",
+  "firstName",
+  "lastName",
   "gender",
   "age",
   "photoUrl",
